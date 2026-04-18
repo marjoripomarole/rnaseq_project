@@ -25,6 +25,11 @@ envs/*/
 *.swp
 *.swo
 
+# R session artifacts
+.RData
+.Rhistory
+.Rproj.user/
+
 # Python
 __pycache__/
 *.py[cod]
