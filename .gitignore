@@ -1,0 +1,32 @@
+# Data files (often large — store elsewhere or with Git LFS)
+data/raw/*.fastq
+data/raw/*.fastq.gz
+data/raw/*.fq
+data/raw/*.fq.gz
+data/reference/*.fa
+data/reference/*.fasta
+data/reference/*.gtf
+data/reference/*.gff
+data/reference/*.gff3
+
+# Results / intermediate files
+results/aligned/*.bam
+results/aligned/*.bam.bai
+results/aligned/*.sam
+results/trimmed/*.fastq
+results/trimmed/*.fastq.gz
+
+# Conda environments (large, reproducible from envs/ YAML files)
+envs/*/
+
+# OS / editor artifacts
+.DS_Store
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
