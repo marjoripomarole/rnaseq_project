@@ -9,6 +9,12 @@ data/reference/*.gtf
 data/reference/*.gff
 data/reference/*.gff3
 
+# fasterq-dump temp directories
+data/raw/fasterq.tmp.*/
+
+# STAR genome index (large, reproducible)
+data/reference/star_index/
+
 # Results / intermediate files
 results/aligned/*.bam
 results/aligned/*.bam.bai
@@ -35,3 +41,5 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+
+tags
