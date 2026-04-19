@@ -18,15 +18,21 @@ for sample in ${SAMPLES}; do
     fastp -i data/raw/${sample}_1.fastq.gz -I data/raw/${sample}_2.fastq.gz \
           -o results/trimmed/${sample}_R1.fastq.gz -O results/trimmed/${sample}_R2.fastq.gz \
           --qualified_quality_phred 20 --length_required 50 \
-          --html results/trimmed/${sample}_fastp.html --thread 4
+          --html results/trimmed/${sample}_fastp.html \
+          --json results/trimmed/${sample}_fastp.json --thread 4
 
-    # Align with STAR
+    # Align with STAR (using FIFOs to stream compressed input on macOS)
+    R1_FIFO=$(mktemp -u /tmp/${sample}_R1.XXXXXX)
+    R2_FIFO=$(mktemp -u /tmp/${sample}_R2.XXXXXX)
+    mkfifo "${R1_FIFO}" "${R2_FIFO}"
+    gunzip -c results/trimmed/${sample}_R1.fastq.gz > "${R1_FIFO}" &
+    gunzip -c results/trimmed/${sample}_R2.fastq.gz > "${R2_FIFO}" &
     STAR --genomeDir ${STAR_IDX} \
-         --readFilesIn results/trimmed/${sample}_R1.fastq.gz results/trimmed/${sample}_R2.fastq.gz \
-         --readFilesCommand zcat \
+         --readFilesIn "${R1_FIFO}" "${R2_FIFO}" \
          --outSAMtype BAM SortedByCoordinate \
          --outFileNamePrefix results/aligned/${sample}_ \
          --runThreadN ${THREADS}
+    rm -f "${R1_FIFO}" "${R2_FIFO}"
 
     # Index BAM
     samtools index results/aligned/${sample}_Aligned.sortedByCoord.out.bam
