@@ -12,8 +12,9 @@ data/reference/*.gff3
 # fasterq-dump temp directories
 data/raw/fasterq.tmp.*/
 
-# STAR genome index (large, reproducible)
+# Genome indices (large, reproducible)
 data/reference/star_index/
+data/reference/hisat2_index/
 
 # Results / intermediate files
 results/aligned/*.bam

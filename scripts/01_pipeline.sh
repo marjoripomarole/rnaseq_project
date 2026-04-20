@@ -4,7 +4,7 @@ set -euo pipefail
 
 SAMPLES="SRR1039508 SRR1039509 SRR1039512 SRR1039513 SRR1039516 SRR1039517 SRR1039520 SRR1039521"
 THREADS=8
-STAR_IDX="data/reference/star_index"
+HISAT2_IDX="data/reference/hisat2_index/GRCh38"
 GTF="data/reference/Homo_sapiens.GRCh38.110.gtf"
 
 for sample in ${SAMPLES}; do
@@ -21,21 +21,17 @@ for sample in ${SAMPLES}; do
           --html results/trimmed/${sample}_fastp.html \
           --json results/trimmed/${sample}_fastp.json --thread 4
 
-    # Align with STAR (using FIFOs to stream compressed input on macOS)
-    R1_FIFO=$(mktemp -u /tmp/${sample}_R1.XXXXXX)
-    R2_FIFO=$(mktemp -u /tmp/${sample}_R2.XXXXXX)
-    mkfifo "${R1_FIFO}" "${R2_FIFO}"
-    gunzip -c results/trimmed/${sample}_R1.fastq.gz > "${R1_FIFO}" &
-    gunzip -c results/trimmed/${sample}_R2.fastq.gz > "${R2_FIFO}" &
-    STAR --genomeDir ${STAR_IDX} \
-         --readFilesIn "${R1_FIFO}" "${R2_FIFO}" \
-         --outSAMtype BAM SortedByCoordinate \
-         --outFileNamePrefix results/aligned/${sample}_ \
-         --runThreadN ${THREADS}
-    rm -f "${R1_FIFO}" "${R2_FIFO}"
+    # Align with HISAT2 (STAR 2.7.11b has a known ARM64 macOS read-input bug)
+    hisat2 -p ${THREADS} \
+           -x ${HISAT2_IDX} \
+           -1 results/trimmed/${sample}_R1.fastq.gz \
+           -2 results/trimmed/${sample}_R2.fastq.gz \
+           --dta \
+           2>results/aligned/${sample}_hisat2.log \
+        | samtools sort -@ ${THREADS} -o results/aligned/${sample}.bam
 
     # Index BAM
-    samtools index results/aligned/${sample}_Aligned.sortedByCoord.out.bam
+    samtools index results/aligned/${sample}.bam
 done
 
 # Count reads per gene
@@ -45,7 +41,7 @@ featureCounts \
     -T ${THREADS} \
     -p --countReadPairs \
     -s 2 \
-    results/aligned/*_Aligned.sortedByCoord.out.bam
+    results/aligned/*.bam
 
 # Aggregate QC reports
 multiqc results/ -o results/ --force
