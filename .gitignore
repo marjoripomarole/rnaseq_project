@@ -20,8 +20,20 @@ data/reference/hisat2_index/
 results/aligned/*.bam
 results/aligned/*.bam.bai
 results/aligned/*.sam
+results/aligned/*.out
+results/aligned/*.tab
+results/aligned/*.log
 results/trimmed/*.fastq
 results/trimmed/*.fastq.gz
+results/trimmed/*.html
+results/trimmed/*.json
+results/qc/*.html
+results/qc/*.zip
+results/counts/
+results/de/
+results/figures/
+results/multiqc_data/
+results/multiqc_report.html
 
 # Conda environments (large, reproducible from envs/ YAML files)
 envs/*/
